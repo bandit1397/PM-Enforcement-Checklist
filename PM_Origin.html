@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>개인형이동장치(PM) 현장단속 체크리스트</title>
+<style>
+  body { font-family: sans-serif; padding: 1rem; background-color: #f7f7f7; }
+  .section { background: #fff; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .hidden { display: none; }
+  .child { margin-left: 1.5rem; margin-top: 0.5rem; }
+  .info-text { margin-left: 1rem; color: blue; font-size: 0.9rem; white-space: normal; }
+  .law-link { color: blue; text-decoration: underline; }
+  .law-link .extra-part { color: blue; text-decoration: none; cursor: default; }
+  .penalty { color: red; }
+  .indent-block { margin-left: 1rem; }
+  .result-box { background: #f0f0f0; border: 1px solid #ccc; padding: 0.8rem; border-radius: 0.5rem; margin-top: 1rem; font-weight: bold; }
+  .red-text { color: red; }
+  ul.no-bullet, ul.no-bullet ul { list-style: none; padding-left: 0; }
+  .indent-1 { margin-left: 1rem; }
+  .indent-2 { margin-left: 2rem; }
+  .indent-3 { margin-left: 3rem; }
+  .indent-4 { margin-left: 4rem; }
+  .ml-1 { margin-left: 1rem; }
+  .ml-2 { margin-left: 2rem; }
+  .ml-3 { margin-left: 3rem; }
+</style>
+</head>
+<body>
+
+<div class="section">
+  <h2>1. 단속전 유의사항</h2>
+  <p style="margin-left: 1rem;"><span style="color:blue;">1. 도로(차도, 보도, 자전거도로) 외 장소의 경우 단속 유의</span></p>
+  <p style="margin-left: 2rem;"><span style="color:blue;">- 음주운전의 경우 도로 외의 경우도 운전으로 본다</span></p>
+  <p style="margin-left: 1rem;"><span style="color:blue;">2. 단속현장 도로 여부 확인이 힘들때</span></p>
+  <p style="margin-left: 2rem;"><span style="color:blue;">- 토지이음(www.eum.go.kr) 토지이용계획 활용 위반장소 지목(도로 여부)확인 가능</span></p>
+  <p style="margin-left: 3rem;"><span style="color:black;">Ex) 목1지구대 관내 행복한백화점과 파라곤 아파트 사이 공간이 도로임을 확인할 수 있다.</span></p>
+</div>
+
+<div class="section">
+  <h2>2. 개인형이동장치(PM) 해당 여부</h2>
+  <p style="margin-left: 1rem;"><span style="color:blue;">전동기 장착 모델로서 아래 조건 충족 여부에 따라 원동기자전거, PM, 전기자전거로 구분됨</span></p>
+  <div class="indent-1"><input type="checkbox" id="throttle" /><label for="throttle">가) Throttle 단독 or Throttle + PAS 겸용 경우 Throttle 단독 가능</label></div>
+  <div class="indent-1"><input type="checkbox" id="speed" /><label for="speed">나) 최고속도 25km/h 이하</label></div>
+  <div class="indent-1"><input type="checkbox" id="weight" /><label for="weight">다) 자체 중량 30kg 이하</label></div>
+  <div class="result-box hidden" id="result">판정 결과: -</div>
+  <p style="margin-left: 1rem;"><span style="color:blue;">참고: 전동 외륜, 이륜보드 및 전동 스케이트보드는 총 중량 및 최고 속도가 충족되어도 핸들이 없기 때문에 원동기장치자전거로 본다</span></p>
+</div>
+
+<div class="section">
+  <h2>3. 위반사항 점검</h2>
+  <form id="checklist"></form>
+  <button type="button" onclick="showSummary()">✓ 위반요약보기</button>
+</div>
+
+<div class="section hidden" id="summarySection">
+  <h2>4. 위반항목 요약</h2>
+  <ul id="summaryList"></ul>
+</div>
+
+<script>
+const checklistData = [
+  { 
+    text: "무면허 위반", 
+    info: `<div class="ml-1">확인사항</div><div class="ml-2">1. 원동기장치자전거면허 이상 운전면허</div><div class="ml-2">2. 13세 미만 어린이 통고처분 대상(X), 보호자에게 과태료 부과</div><div class="ml-2">3. 13세 미만 어린이가 보호자 보유 PM 이용 및 보호자가 어린이의 PM 운행사실 인지하고 있는 경우 보호자 과태료</div>`,
+    sub: [
+      { text: "13세 이상", penalty: "범칙금 10만원, 결격기간(1회: 1년, 3회 이상: 2년)", law: "도로교통법 제43조, 도로교통법 제162조 제3항, 도로교통법 시행령 제93조 제1항 별표8 1의4" },
+      { text: "13세 미만", penalty: "과태료 10만원", law: "도로교통법 제11조 제4항, 도로교통법 제160조 제2항 제9호" }
+    ]
+  },
+  { 
+    text: "음주운전", 
+    info: "확인사항: 도로가 아닌 경우도 적용",
+    sub: [
+      { text: "음주운전", penalty: "범칙금 10만원", law: "도로교통법 제44조 제1항, 도로교통법 제156조 제11호, 도로교통법 제162조 제1항, 도로교통법 시행령 제93조 별표8 64의2" },
+      { text: "음주측정거부", penalty: "범칙금 13만원", law: "도로교통법 제44조 제2항, 도로교통법 제156조 제11호, 도로교통법 제162조 제1항, 도로교통법 시행령 제93조 별표8 64의2" },
+      { text: "음주측정방해", penalty: "범칙금 13만원", law: "도로교통법 제44조 제5항, 도로교통법 제156조 제11호, 도로교통법 제162조 제1항, 도로교통법 시행령 제93조 별표8 64의2" }
+    ]
+  },
+  { 
+    text: "운전자준수사항(안전모 및 승차정원)", 
+    info: `<div class="ml-1">확인사항</div><div class="ml-2">1. 운전자 안전모 미착용: 운전자에게 범칙금, 동승자 미착용: 운전자에게 과태료(동승자 처벌 X)</div><div class="ml-2">2. 승차정원 초과: 운전자에게 범칙금(동승자 처벌 X)</div>`,
+    sub: [
+      { text: "운전자 미착용", penalty: "범칙금 2만원", law: "도로교통법 제50조 제4항, 도로교통법 제162조 제3항, 도로교통법 시행령 제93조 별표8 38의2" },
+      { text: "동승자 미착용", penalty: "과태료 2만원", law: "도로교통법 제50조 제4항, 도로교통법 제160조 제2항 제3호" },
+      { text: "승차정원 초과", penalty: "범칙금 4만원", law: "도로교통법 제50조 제10항, 도로교통법 제162조 제3항 제3호, 도로교통법 시행령 제93조 별표8 3의4" }
+    ]
+  },
+  { 
+    text: "통행방법 위반", 
+    info: `<div class="ml-1">확인사항</div><div class="ml-2">1. 보도와 차도가 구분된 도로에서는 차도로 통행.(다음 예외)</div><div class="ml-3">가. 안전표지로 통행 허용경우</div><div class="ml-3">나. 도로 파손 등으로 통행을 할수 없을 경우</div><div class="ml-2">2. 자전거도로가 따로 있는 곳에서는 자전거도로 통행.</div>`,
+    sub: [
+      { text: "보도운행", penalty: "범칙금 3만원", law: "도로교통법 제13조 제1항, 도로교통법 제162조 제3항, 도로교통법 시행령 제93조 제1항 별표8 5" },
+      { text: "자전거도로 우선이용", penalty: "범칙금 3만원", law: "도로교통법 제13조의2 제1항, 도로교통법 제162조 제3항, 도로교통법 시행령 제93조 제1항 별표8 5" },
+      { text: "중앙선침범", penalty: "범칙금 3만원", law: "도로교통법 제13조 제3항, 도로교통법 제162조 제3항, 도로교통법 시행령 제93조 제1항 별표8 5" }
+    ]
+  }
+];
+
+window.onload = () => {
+  const form = document.getElementById("checklist");
+
+  checklistData.forEach((item, i) => {
+    const parentId = `parent_${i}`;
+
+    // 부모 체크박스 생성
+    const parentDiv = document.createElement("div");
+    parentDiv.innerHTML = `<label><input type="checkbox" id="${parentId}"> ${item.text}</label>`;
+    form.appendChild(parentDiv);
+
+    // info 영역 생성
+    const infoDiv = document.createElement("div");
+    infoDiv.id = `info_${i}`;
+    infoDiv.className = "info-text hidden";
+    infoDiv.innerHTML = `<div>${formatLaw(item.info)}</div>`;
+    form.appendChild(infoDiv);
+
+    // 자식 체크박스 영역 생성
+    const childDiv = document.createElement("div");
+    childDiv.className = "child hidden";
+    childDiv.id = `child_${i}`;
+    item.sub.forEach((subItem, j) => {
+      const subId = `sub_${i}_${j}`;
+      const subDiv = document.createElement("div");
+      subDiv.innerHTML = `<label><input type="checkbox" id="${subId}"> ${subItem.text}</label>`;
+      childDiv.appendChild(subDiv);
+    });
+    form.appendChild(childDiv);
+
+    // 부모 체크박스 이벤트
+    document.getElementById(parentId).addEventListener("change", () => {
+      const isChecked = document.getElementById(parentId).checked;
+      infoDiv.classList.toggle("hidden", !isChecked);
+      childDiv.classList.toggle("hidden", !isChecked);
+    });
+  });
+
+  document.getElementById("throttle").addEventListener("change", updateResult);
+  document.getElementById("speed").addEventListener("change", updateResult);
+  document.getElementById("weight").addEventListener("change", updateResult);
+};
+
+function showSummary() {
+  const summary = document.getElementById("summaryList");
+  summary.innerHTML = "";
+
+  checklistData.forEach((item, i) => {
+    const parentChecked = document.getElementById(`parent_${i}`).checked;
+    const hasSub = item.sub && item.sub.length > 0;
+    if (!parentChecked) return;
+
+    const subChecked = hasSub && item.sub.some((_, j) => document.getElementById(`sub_${i}_${j}`).checked);
+
+    if (!subChecked) {
+      summary.innerHTML += `<li><strong>${item.text}</strong><br>`;
+      summary.innerHTML += `<div class="indent-block"><span class="penalty">${item.sub[0].penalty}</span></div>`;
+      summary.innerHTML += `<div class="indent-block">${formatLaw(item.sub[0].law)}</div>`;
+      summary.innerHTML += `</li>`;
+    } else {
+      item.sub.forEach((subItem, j) => {
+        if (document.getElementById(`sub_${i}_${j}`).checked) {
+          summary.innerHTML += `<li><strong>${item.text} → ${subItem.text}</strong><br>`;
+          summary.innerHTML += `<div class="indent-block"><span class="penalty">${subItem.penalty}</span></div>`;
+          summary.innerHTML += `<div class="indent-block">${formatLaw(subItem.law)}</div>`;
+          summary.innerHTML += `</li>`;
+        }
+      });
+    }
+  });
+
+  if (summary.children.length === 0) {
+    summary.innerHTML = "<li>위반 사항 없음</li>";
+  }
+  document.getElementById("summarySection").classList.remove("hidden");
+}
+
+function formatLaw(text) {
+  /*
+  법령명: 도로교통법, 도로교통법 시행령, 도로교통법 시행규칙
+  조문, 항목 등 다양한 패턴 링크 적용
+
+  구현 목표:
+  - "도로교통법 제44조 제1항, 도로교통법 제156조 제11호, 도로교통법 시행령 제93조 별표8 64의2"
+  - 전체 문장 내에서 "도로교통법", "도로교통법 시행령" 등 법령명,
+    "제NN조" (이 부분까지만 링크)
+  - "제NN호", "별표NN" 등은 링크 영역 밖에 있지만 파란색 텍스트 유지
+
+  방식:
+  - 정규식으로 법령명 + 조문 등 매칭
+  - 조문 "제NN조" 부분은 <a> 링크로 감싸고,
+  - 뒤에 붙는 "제1항", "제11호", "별표8" 등은 링크 바깥에서 따로 <span> 파란색 텍스트로 감싸기
+  */
+
+  // 법령명 패턴
+  const lawNames = ["도로교통법", "도로교통법 시행령", "도로교통법 시행규칙"];
+  const lawNamesPattern = lawNames.join("|");
+
+  // 정규식 패턴: 
+  // 1) 법령명 + ' 제NN조' + optional ' 제NN항' or ' 제NN호' or ' 별표NN ...'
+  // 이 중 '제NN조'까지만 링크, 나머지는 링크 바깥 <span class="extra-part">
+  // 예시: 도로교통법 제44조 제1항 → 링크: 도로교통법 제44조, 파란 텍스트: 제1항
+  // 다수 반복 가능
+
+  // 아래는 한번에 여러개 잡기 위해 global, 여러 그룹으로 잡음
+
+  const regex = new RegExp(
+    `(${lawNamesPattern})\\s*제\\s*(\\d+)\\s*조` +          // 법령명 + 제NN조 (1~3 그룹)
+    `(\\s*제\\s*\\d+\\s*항)?` +                            // optional 제NN항 (4그룹)
+    `(\\s*제\\s*\\d+\\s*호)?` +                            // optional 제NN호 (5그룹)
+    `(\\s*별표\\s*\\d+.*)?`,                               // optional 별표NN + 기타 (6그룹)
+    "g"
+  );
+
+  return text.replace(regex, (match, lawName, joNum, optHang, optHo, optByulpyo) => {
+    const lawUrlName = lawName.replace(/\s/g, "");
+    const url = `https://www.law.go.kr/법령/${lawUrlName}/제${joNum}조`;
+
+    // 링크 영역: 법령명 + ' 제NN조' 부분까지만
+    // 나머지 (optHang, optHo, optByulpyo)는 링크 영역 밖에 span으로 감싸서 파란색 유지
+
+    // optHang, optHo, optByulpyo 중 undefined면 빈 문자열로
+    const hangPart = optHang ? optHang : "";
+    const hoPart = optHo ? optHo : "";
+    const byulpyoPart = optByulpyo ? optByulpyo : "";
+
+    // 반환 문자열 조립
+    // 링크 안 텍스트: lawName + " 제NN조"
+    // 링크 밖 텍스트: 각 옵션 부분(항, 호, 별표 등)을 span.extra-part로 감싼다
+    return `<a href="${url}" target="_blank" class="law-link">${lawName} 제${joNum}조</a>` +
+      `<span class="extra-part">${hangPart}${hoPart}${byulpyoPart}</span>`;
+  });
+}
+
+function updateResult() {
+  const throttle = document.getElementById("throttle").checked;
+  const speed = document.getElementById("speed").checked;
+  const weight = document.getElementById("weight").checked;
+  const resultBox = document.getElementById("result");
+
+  if (throttle || speed || weight) {
+    resultBox.classList.remove("hidden");
+  } else {
+    resultBox.classList.add("hidden");
+  }
+
+  let resultText = "-";
+  if (speed && weight && throttle) {
+    resultText = "<span class='red-text'>개인형이동장치</span>";
+  } else if (speed && weight && !throttle) {
+    resultText = "<span class='red-text'>전기자전거</span>";
+  } else if (!speed || !weight) {
+    resultText = "<span class='red-text'>원동기장치 자전거</span>";
+  }
+  resultBox.innerHTML = `판정 결과: ${resultText}`;
+}
+</script>
+
+</body>
+</html>
